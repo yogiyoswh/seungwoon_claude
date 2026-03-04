@@ -268,6 +268,23 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh phase 5 complete
 - 피드백 반영 완료 시
 - 중요한 결정 사항 확정 시
 
+## 프로토콜 연계
+
+**우선순위**: Hermeneia → Prothesis → Syneidesis → Katalepsis
+
+| 상황 | 프로토콜 | 별칭 |
+|------|----------|------|
+| 응답이 모호하면 | `/hermeneia` | `/clarify`, `/hmn` |
+| 설계 방향이 여러 개면 | `/prothesis` | `/lens` |
+| 결정 전 확인이 필요하면 | `/syneidesis` | `/gap` |
+| AI 작업 결과 이해가 필요하면 | `/katalepsis` | `/grasp` |
+
+**Phase별 적용 가이드**:
+- Phase 1 (컨텍스트 수집): Hermeneia - 요구사항 명확화
+- Phase 3 (요구사항 구체화): Hermeneia, Prothesis - 방향 결정
+- Phase 4 (솔루션 도출): Prothesis, Syneidesis - 설계 검토
+- Phase 5 (피드백): Katalepsis - 결과물 이해 확인
+
 ## 출력
 
 1. 생성된 폴더 경로: `docs/{브랜치명}/`
