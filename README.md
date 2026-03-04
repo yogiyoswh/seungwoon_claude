@@ -1,13 +1,24 @@
 # seungwoon_claude
 
-Claude Code 플러그인 마켓플레이스. 요구사항 분석과 파일 기반 계획 수립 스킬을 제공합니다.
+Claude Code 플러그인 마켓플레이스. 요구사항 분석, 파일 기반 계획 수립, 사고 프로토콜 스킬을 제공합니다.
 
-## 포함된 플러그인
+## 포함된 스킬
 
-| 플러그인 | 유형 | 설명 |
-|----------|------|------|
-| **analyze-requirements** | Command | 단계별 요구사항 분석 워크플로우. Jira 연동, 조사(subagent), 피드백 루프 포함 |
-| **planning-with-files** | Skill | Manus 스타일 파일 기반 계획. task_plan.md, findings.md, progress.md로 working memory 관리 |
+### 핵심 스킬
+
+| 스킬 | 설명 |
+|------|------|
+| **analyze-requirements** | 단계별 요구사항 분석 워크플로우. Jira 연동, 조사(subagent), 피드백 루프 포함 |
+| **planning-with-files** | Manus 스타일 파일 기반 계획. task_plan.md, findings.md, progress.md로 working memory 관리 |
+
+### 프로토콜 스킬 (analyze-requirements 연계)
+
+| 스킬 | 별칭 | 설명 |
+|------|------|------|
+| **hermeneia** | `/clarify`, `/hmn` | 의도-표현 불일치 명확화. 응답이 모호할 때 사용 |
+| **prothesis** | `/lens` | 다중 관점 분석. 설계 방향이 여러 개일 때 사용 |
+| **syneidesis** | `/gap` | 결정 전 Gap 표면화. 결정 전 확인이 필요할 때 사용 |
+| **katalepsis** | `/grasp` | 이해도 검증. AI 작업 결과 이해가 필요할 때 사용 |
 
 ## 설치
 
@@ -31,7 +42,7 @@ claude plugin list
 
 ### analyze-requirements
 
-슬래시 커맨드로 실행:
+슬래시 커맨드로 실행하거나, 요구사항 분석이 필요한 상황에서 자동 활성화됩니다.
 
 ```
 /analyze-requirements
@@ -80,6 +91,25 @@ docs/{브랜치명}/
 - 2번 조회 후 즉시 findings.md에 기록 (2-Action Rule)
 - 주요 결정 전 plan 파일 재읽기 (attention refresh)
 - 실패한 작업은 반복하지 않고 접근법 변경 (3-Strike Protocol)
+
+### 프로토콜 스킬
+
+analyze-requirements 워크플로우의 각 Phase에서 자동 연계되며, 독립적으로도 사용 가능합니다.
+
+```
+/hermeneia    # 요구사항이 모호할 때 — 의도-표현 Gap 분석
+/prothesis    # 설계 방향이 여러 개일 때 — 다중 관점 비교
+/syneidesis   # 결정 전 빠진 부분이 없는지 — Gap 체크리스트
+/katalepsis   # AI 결과물을 제대로 이해했는지 — 이해도 검증
+```
+
+**Phase별 적용 가이드:**
+| Phase | 프로토콜 | 목적 |
+|-------|----------|------|
+| Phase 1 (컨텍스트 수집) | hermeneia | 요구사항 명확화 |
+| Phase 3 (요구사항 구체화) | hermeneia, prothesis | 방향 결정 |
+| Phase 4 (솔루션 도출) | prothesis, syneidesis | 설계 검토 |
+| Phase 5 (피드백) | katalepsis | 결과물 이해 확인 |
 
 ## 제거
 
