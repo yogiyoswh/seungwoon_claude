@@ -8,17 +8,10 @@
   },
   "plugins": [
     {
-      "name": "analyze-requirements",
-      "description": "Structured requirements analysis workflow with Jira integration, phased investigation, and feedback loops. Creates docs/{branch}/ folder with progress tracking, context, decisions, requirements, and solution files.",
+      "name": "seungwoon-skills",
+      "description": "Requirements analysis command (/analyze-requirements) and Manus-style file-based planning skill (planning-with-files) in one package",
       "version": "1.0.0",
-      "source": "./plugins/analyze-requirements",
-      "category": "productivity"
-    },
-    {
-      "name": "planning-with-files",
-      "description": "Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md as persistent working memory on disk. Includes session recovery and completion hooks.",
-      "version": "1.0.0",
-      "source": "./plugins/planning-with-files",
+      "source": "./plugins/seungwoon-skills",
       "category": "productivity"
     }
   ]
