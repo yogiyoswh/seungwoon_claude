@@ -28,9 +28,23 @@ Claude Code 플러그인 마켓플레이스. 요구사항 분석, 파일 기반 
 # 1. GitHub 레포를 플러그인 소스로 등록
 claude plugin marketplace add yogiyoswh/seungwoon_claude
 
-# 2. 플러그인 설치 (한 번에 analyze-requirements + planning-with-files 모두 포함)
+# 2. 플러그인 설치
 claude plugin install seungwoon-skills@seungwoon_claude
 ```
+
+### 특정 프로젝트에만 설치
+
+`--scope` 옵션으로 설치 범위를 지정할 수 있습니다.
+
+```bash
+# 프로젝트 단위 설치 (해당 프로젝트에서만 활성화)
+claude plugin install --scope project seungwoon-skills@seungwoon_claude
+```
+
+| Scope | 설명 | 적용 범위 |
+|-------|------|-----------|
+| `user` (기본값) | 전역 설치 | 모든 프로젝트에서 사용 가능 |
+| `project` | 프로젝트 설치 | 해당 프로젝트에서만 사용 가능 |
 
 설치 후 확인:
 
