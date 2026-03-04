@@ -1,0 +1,25 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "seungwoon_claude",
+  "description": "Requirements analysis and file-based planning skills for Claude Code",
+  "owner": {
+    "name": "seungwoon",
+    "url": "https://github.com/yogiyoswh"
+  },
+  "plugins": [
+    {
+      "name": "analyze-requirements",
+      "description": "Structured requirements analysis workflow with Jira integration, phased investigation, and feedback loops. Creates docs/{branch}/ folder with progress tracking, context, decisions, requirements, and solution files.",
+      "version": "1.0.0",
+      "source": "./plugins/analyze-requirements",
+      "category": "productivity"
+    },
+    {
+      "name": "planning-with-files",
+      "description": "Manus-style file-based planning for complex tasks. Creates task_plan.md, findings.md, and progress.md as persistent working memory on disk. Includes session recovery and completion hooks.",
+      "version": "1.0.0",
+      "source": "./plugins/planning-with-files",
+      "category": "productivity"
+    }
+  ]
+}

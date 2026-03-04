@@ -1,0 +1,8 @@
+{
+  "name": "analyze-requirements",
+  "version": "1.0.0",
+  "description": "Structured requirements analysis workflow with phased investigation and feedback loops",
+  "author": {
+    "name": "seungwoon"
+  }
+}

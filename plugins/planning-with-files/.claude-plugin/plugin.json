@@ -1,0 +1,8 @@
+{
+  "name": "planning-with-files",
+  "version": "1.0.0",
+  "description": "Manus-style file-based planning for complex tasks with persistent markdown files",
+  "author": {
+    "name": "seungwoon"
+  }
+}
