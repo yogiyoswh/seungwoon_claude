@@ -23,6 +23,7 @@ DOCS_DIR="docs/${BRANCH_NAME}"
 PROGRESS_FILE="$DOCS_DIR/progress.md"
 INVESTIGATION_DIR="$DOCS_DIR/investigation"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_DIR="$SCRIPT_DIR/../templates"
 
 kst_date() { TZ='Asia/Seoul' date +%Y-%m-%d; }
 kst_time() { TZ='Asia/Seoul' date +%H:%M:%S; }
@@ -41,12 +42,32 @@ sed_inplace() {
     rm -f "${target}.bak"
 }
 
+# Fill template placeholders and write to target
+# Usage: fill_template "template_name" "target_path"
+fill_template() {
+    local template="$TEMPLATE_DIR/$1"
+    local target="$2"
+    local JIRA_KEY=$(echo "$BRANCH_NAME" | grep -oE '^[a-zA-Z]+-[0-9]+' | tr '[:lower:]' '[:upper:]' || echo "")
+
+    if [ ! -f "$template" ]; then
+        echo "ERROR: Template not found: $template"
+        return 1
+    fi
+
+    sed \
+        -e "s|__BRANCH__|$BRANCH_NAME|g" \
+        -e "s|__JIRA_KEY__|${JIRA_KEY:-N/A}|g" \
+        -e "s|__DATE__|$(kst_date)|g" \
+        -e "s|__TIME__|$(kst_time)|g" \
+        -e "s|__JIRA_URL__|${JIRA_KEY:+https://jira.example.com/browse/$JIRA_KEY}|g" \
+        "$template" > "$target"
+}
+
 # Append a row to a markdown table section in progress.md
-# Usage: append_table_row "section_header" "col1" "col2" ...
 append_table_row() {
     local section="$1"; shift
     local row="| $(printf '%s | ' "$@")"
-    row="${row% | }"  # trim trailing " | "
+    row="${row% | }"
 
     awk -v section="$section" -v row="$row" '
         $0 ~ "^## " section { in_section=1 }
@@ -73,169 +94,22 @@ add_progress_log() {
 # ============================================================
 
 cmd_init() {
-    local DATE=$(kst_date)
-    local TIME=$(kst_time)
-    local JIRA_KEY=$(echo "$BRANCH_NAME" | grep -oE '^[a-zA-Z]+-[0-9]+' | tr '[:lower:]' '[:upper:]' || echo "")
-
     echo "=== Analyze Requirements Init ==="
     echo "Branch: $BRANCH_NAME"
-    echo "Jira Key: ${JIRA_KEY:-N/A}"
     echo "Target Dir: $DOCS_DIR"
     echo ""
 
     mkdir -p "$INVESTIGATION_DIR"
 
-    # Create progress.md
-    if [ ! -f "$DOCS_DIR/progress.md" ]; then
-        cat > "$DOCS_DIR/progress.md" << EOF
-# 분석 진행 상황
-
-> 브랜치: \`$BRANCH_NAME\`
-> Jira: ${JIRA_KEY:-N/A}
-> 시작: $DATE $TIME
-
-## 체크리스트
-
-### Phase 1: 컨텍스트 수집
-- [ ] Jira 티켓 정보 수집 → context.md
-- [ ] 사용자 초기 요구사항 확인
-- **Status:** in_progress
-
-### Phase 2: 조사 (subagent 활용)
-- [ ] 관련 코드 분석 → investigation/code-analysis.md
-- [ ] 영향 범위 분석 → investigation/impact-analysis.md
-- **Status:** pending
-
-### Phase 3: 요구사항 구체화
-- [ ] 핵심 요구사항 정리 → requirements.md
-- [ ] 결정 사항 기록 → decisions.md
-- **Status:** pending
-
-### Phase 4: 솔루션 도출
-- [ ] 옵션 검토 및 권장안 → solution.md
-- **Status:** pending
-
-### Phase 5: 피드백 루프
-- [ ] 초기 결과물 리뷰 요청
-- **Status:** pending
-- **Iterations:** 0
-
-## 피드백 기록
-| 시간 | 대상 | 피드백 내용 | 반영 상태 |
-|------|------|-------------|----------|
-
-## 진행 로그
-| 시간 | 작업 | 결과 |
-|------|------|------|
-| $TIME | 분석 시작 | 폴더 구조 생성 |
-EOF
-        echo "Created: $DOCS_DIR/progress.md"
-    else
-        echo "Exists: $DOCS_DIR/progress.md"
-    fi
-
-    # Template files: name -> content
-    local -a files=(context decisions requirements solution)
-
-    if [ ! -f "$DOCS_DIR/context.md" ]; then
-        cat > "$DOCS_DIR/context.md" << EOF
-# 컨텍스트
-
-## Jira 티켓
-- **키:** ${JIRA_KEY:-TBD}
-- **제목:**
-- **상태:**
-- **담당자:**
-
-## 티켓 설명
-[Jira description 내용을 여기에 기록]
-
-## 주요 코멘트
-[중요 코멘트 요약]
-
-## 관련 링크
-- Jira: ${JIRA_KEY:+https://jira.example.com/browse/$JIRA_KEY}
-
-## 사용자 피드백
-[분석 과정에서 받은 사용자 피드백 기록]
-EOF
-        echo "Created: $DOCS_DIR/context.md"
-    else
-        echo "Exists: $DOCS_DIR/context.md"
-    fi
-
-    if [ ! -f "$DOCS_DIR/decisions.md" ]; then
-        cat > "$DOCS_DIR/decisions.md" << EOF
-# 결정 사항
-
-## 확정된 결정
-| 일시 | 항목 | 결정 내용 | 근거 |
-|------|------|----------|------|
-
-## 미결정 사항
-| 항목 | 옵션들 | 권장 | 상태 |
-|------|--------|------|------|
-
-## 결정 로그
-[결정 과정에서의 논의 사항 기록]
-EOF
-        echo "Created: $DOCS_DIR/decisions.md"
-    else
-        echo "Exists: $DOCS_DIR/decisions.md"
-    fi
-
-    if [ ! -f "$DOCS_DIR/requirements.md" ]; then
-        cat > "$DOCS_DIR/requirements.md" << EOF
-# 요구사항
-
-## 핵심 요구사항
-1.
-
-## 비기능 요구사항
-- 성능:
-- 호환성:
-- 보안:
-
-## 제약 조건
--
-
-## 수용 기준 (Acceptance Criteria)
-- [ ]
-EOF
-        echo "Created: $DOCS_DIR/requirements.md"
-    else
-        echo "Exists: $DOCS_DIR/requirements.md"
-    fi
-
-    if [ ! -f "$DOCS_DIR/solution.md" ]; then
-        cat > "$DOCS_DIR/solution.md" << EOF
-# 제안 솔루션
-
-## 아키텍처 개요
-[다이어그램 또는 흐름 설명]
-
-## 검토한 옵션
-| 옵션 | 설명 | 장점 | 단점 |
-|------|------|------|------|
-
-## 권장안
-[선택한 옵션과 이유]
-
-## 구현 계획
-### Phase 1:
-### Phase 2:
-
-## 데이터 일관성 고려사항
-[비동기/재처리 로직이 있는 경우]
-
-## 리스크 및 완화 방안
-| 리스크 | 영향 | 완화 방안 |
-|--------|------|----------|
-EOF
-        echo "Created: $DOCS_DIR/solution.md"
-    else
-        echo "Exists: $DOCS_DIR/solution.md"
-    fi
+    local templates=(progress context decisions requirements solution)
+    for name in "${templates[@]}"; do
+        if [ ! -f "$DOCS_DIR/${name}.md" ]; then
+            fill_template "${name}.md" "$DOCS_DIR/${name}.md"
+            echo "Created: $DOCS_DIR/${name}.md"
+        else
+            echo "Exists: $DOCS_DIR/${name}.md"
+        fi
+    done
 
     echo ""
     echo "=== Init Complete ==="
@@ -358,39 +232,19 @@ cmd_investigate() {
 
     local FILENAME=$(echo "$NAME" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
     local FILEPATH="$INVESTIGATION_DIR/${FILENAME}.md"
-    local DATE=$(kst_date)
-    local TIME=$(kst_time)
 
-    # Create investigation file
     if [ ! -f "$FILEPATH" ]; then
         mkdir -p "$INVESTIGATION_DIR"
-        cat > "$FILEPATH" << EOF
-# $DESCRIPTION
-
-> 생성: $DATE $TIME
-> 상태: 조사 중
-
-## 요약
-[조사 결과 요약]
-
-## 상세 분석
-[상세 분석 내용]
-
-## 관련 파일
--
-
-## 발견 사항
--
-
-## 결론
-[결론 및 권장 사항]
-EOF
+        sed \
+            -e "s|__DESCRIPTION__|$DESCRIPTION|g" \
+            -e "s|__DATE__|$(kst_date)|g" \
+            -e "s|__TIME__|$(kst_time)|g" \
+            "$TEMPLATE_DIR/investigation.md" > "$FILEPATH"
         echo "Created: $FILEPATH"
     else
         echo "Exists: $FILEPATH"
     fi
 
-    # Add to Phase 2 checklist
     if ! grep -q "$FILENAME.md" "$PROGRESS_FILE"; then
         sed_inplace "/### Phase 2:/,/\*\*Status:\*\*/ {
             /\*\*Status:\*\*/i\\
@@ -409,7 +263,6 @@ EOF
 cmd_feedback() {
     require_progress
 
-    # Parse arguments
     local TYPE="general"
     local INVESTIGATION_NAME=""
     local FEEDBACK=""
@@ -425,10 +278,6 @@ cmd_feedback() {
         echo "Usage: $0 feedback --type <type> \"content\""
         echo ""
         echo "Types: context, investigation, requirement, decision, general"
-        echo ""
-        echo "Examples:"
-        echo "  $0 feedback --type context \"API 응답 형식 확인 필요\""
-        echo "  $0 feedback --type investigation -i code-analysis \"캐시 로직 추가 검토\""
         exit 1
     fi
 
@@ -457,7 +306,6 @@ cmd_feedback() {
         *) echo "ERROR: Unknown type: $TYPE"; exit 1 ;;
     esac
 
-    # Add feedback to target file
     if [ -n "$TARGET_FILE" ] && [ -f "$TARGET_FILE" ]; then
         if ! grep -q "## $SECTION" "$TARGET_FILE"; then
             echo "" >> "$TARGET_FILE"
@@ -467,21 +315,16 @@ cmd_feedback() {
         echo "Added to: $TARGET_FILE (## $SECTION)"
     fi
 
-    # Add to feedback log table
     local DISPLAY_TARGET=$(basename "${TARGET_FILE:-progress.md}")
     local FEEDBACK_SHORT="${FEEDBACK:0:50}"
     append_table_row "피드백 기록" "$TIME" "$DISPLAY_TARGET" "$FEEDBACK_SHORT..." "pending"
-
-    # Add to progress log
     add_progress_log "피드백 추가: $DISPLAY_TARGET"
 
-    # Increment iteration count
     local CURRENT_ITER=$(grep '\*\*Iterations:\*\*' "$PROGRESS_FILE" | sed 's/.*\*\*Iterations:\*\* \([0-9]*\).*/\1/' || echo "0")
     CURRENT_ITER=${CURRENT_ITER:-0}
     local NEW_ITER=$((CURRENT_ITER + 1))
     sed_inplace "s/\*\*Iterations:\*\* $CURRENT_ITER/\*\*Iterations:\*\* $NEW_ITER/" "$PROGRESS_FILE"
 
-    # Activate Phase 5 if pending
     sed_inplace '/### Phase 5:/,/\*\*Status:\*\*/ {
         s/\*\*Status:\*\* pending/**Status:** in_progress/
     }' "$PROGRESS_FILE"
@@ -541,7 +384,6 @@ cmd_feedback_done() {
             _mark_feedback_by_index "$1"
             ;;
         "")
-            # List then prompt
             cmd_feedback_done --list
             echo ""
             read -p "Enter number to mark done (or 'all'/'q'): " choice
