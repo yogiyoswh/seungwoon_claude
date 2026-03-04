@@ -27,7 +27,7 @@ hooks:
     - hooks:
         - type: command
           command: |
-            SCRIPT_DIR="${CLAUDE_PLUGIN_ROOT}/scripts"
+            SCRIPT_DIR="${CLAUDE_PLUGIN_ROOT}/planning-with-files/scripts"
             if command -v pwsh &> /dev/null && [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OS" == "Windows_NT" ]]; then
               pwsh -ExecutionPolicy Bypass -File "$SCRIPT_DIR/check-complete.ps1" 2>/dev/null || powershell -ExecutionPolicy Bypass -File "$SCRIPT_DIR/check-complete.ps1" 2>/dev/null || bash "$SCRIPT_DIR/check-complete.sh"
             else
@@ -45,7 +45,7 @@ Work like Manus: Use persistent markdown files as your "working memory on disk."
 
 ```bash
 # Linux/macOS
-$(command -v python3 || command -v python) ${CLAUDE_PLUGIN_ROOT}/scripts/session-catchup.py "$(pwd)"
+$(command -v python3 || command -v python) ${CLAUDE_PLUGIN_ROOT}/planning-with-files/scripts/session-catchup.py "$(pwd)"
 ```
 
 ```powershell
@@ -61,7 +61,7 @@ If catchup report shows unsynced context:
 
 ## Important: Where Files Go
 
-- **Templates** are in `${CLAUDE_PLUGIN_ROOT}/templates/`
+- **Templates** are in `${CLAUDE_PLUGIN_ROOT}/planning-with-files/templates/`
 - **Your planning files** go in **your project directory**
 
 | Location | What Goes There |

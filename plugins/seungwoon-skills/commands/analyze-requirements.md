@@ -19,7 +19,7 @@ hooks:
           command: |
             BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
             PROGRESS="docs/${BRANCH}/progress.md"
-            SCRIPT="${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh"
+            SCRIPT="${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh"
             if [ ! -f "$PROGRESS" ]; then
               echo ""
               echo "╔══════════════════════════════════════════════════════════════╗"
@@ -47,7 +47,7 @@ hooks:
     - hooks:
         - type: command
           command: |
-            bash "${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh" check
+            bash "${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh" check
 ---
 
 # Analyze Requirements
@@ -60,7 +60,7 @@ hooks:
 **Before starting work**, check for unsynced context from a previous session:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh init
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh init
 ```
 
 ## 폴더 구조
@@ -99,7 +99,7 @@ docs/{브랜치명}/
 
 #### 1.1 Init 스크립트 실행
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh init
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh init
 ```
 
 이 스크립트가 생성하는 파일:
@@ -116,7 +116,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh init
 
 #### 1.3 체크리스트 업데이트
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh update "Jira 티켓 정보 수집" done
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh update "Jira 티켓 정보 수집" done
 ```
 
 ### Phase 2: 조사 (Subagent 활용)
@@ -125,7 +125,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh update "Jira 티켓 정보 수집"
 
 #### 2.1 조사 항목 추가
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh investigate "api-integration" "외부 API 연동 분석"
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh investigate "api-integration" "외부 API 연동 분석"
 ```
 
 #### 2.2 Subagent로 조사 실행
@@ -148,7 +148,7 @@ docs/{브랜치명}/investigation/{파일명}.md
 - 각 subagent 완료 후 progress.md 체크리스트 업데이트
 - 모든 조사 완료 시 Phase 2 상태 변경:
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh phase 2 complete
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh phase 2 complete
 ```
 
 ### Phase 3: 요구사항 구체화 (사용자 상호작용)
@@ -182,7 +182,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh phase 2 complete
 
 #### 4.2 최종 체크
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh check
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh check
 ```
 
 ### Phase 5: 피드백 루프
@@ -199,16 +199,16 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh check
 피드백 유형에 따라 적절한 파일에 기록:
 ```bash
 # 컨텍스트 관련 피드백 → context.md
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback --type context "API 응답 형식 재확인 필요"
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback --type context "API 응답 형식 재확인 필요"
 
 # 조사 관련 피드백 → investigation 파일
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback --type investigation -i code-analysis "캐시 로직 추가 검토"
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback --type investigation -i code-analysis "캐시 로직 추가 검토"
 
 # 요구사항 관련 피드백 → requirements.md
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback --type requirement "성능 요구사항 구체화 필요"
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback --type requirement "성능 요구사항 구체화 필요"
 
 # 결정 관련 피드백 → decisions.md
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback --type decision "옵션 A로 결정 확정"
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback --type decision "옵션 A로 결정 확정"
 ```
 
 #### 5.3 피드백 반영
@@ -216,13 +216,13 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback --type decision "옵션 A
 - 반영 완료 후 상태 업데이트:
 ```bash
 # 대화형 모드 (pending 피드백 목록 보여주고 선택)
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback-done
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback-done
 
 # 특정 피드백 번호로 직접 완료 처리
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback-done 1
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback-done 1
 
 # 모든 pending 피드백 완료 처리
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback-done --all
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh feedback-done --all
 ```
 - 필요시 추가 조사는 Phase 2로 돌아가서 subagent 활용
 
@@ -230,7 +230,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh feedback-done --all
 피드백이 더 이상 없을 때까지 5.1-5.3 반복.
 최종 승인 시:
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze.sh phase 5 complete
+bash ${CLAUDE_PLUGIN_ROOT}/analyze-requirements/scripts/analyze.sh phase 5 complete
 ```
 
 ## Critical Rules
